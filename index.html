@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EDS Program Login</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #user-info { margin-top: 20px; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>EDS PROGRAM - Login</h1>
+
+  <!-- Bouton login/signup -->
+  <div id="auth">
+    <button onclick="netlifyIdentity.open()">Se connecter / S'inscrire</button>
+  </div>
+
+  <!-- Zòn pou montre user info -->
+  <div id="user-info"></div>
+
+  <script>
+    netlifyIdentity.on('init', user => console.log("Init:", user));
+    
+    netlifyIdentity.on('login', user => {
+      document.getElementById("user-info").innerHTML = `
+        <p>Bienvenue <b>${user.user_metadata.full_name || user.email}</b></p>
+        <p>Email: ${user.email}</p>
+        <button onclick="netlifyIdentity.logout()">Déconnexion</button>
+      `;
+      console.log("User logged in:", user);
+    });
+
+    netlifyIdentity.on('logout', () => {
+      document.getElementById("user-info").innerHTML = "";
+      console.log("User logged out");
+    });
+  </script>
+</body>
+</html>
