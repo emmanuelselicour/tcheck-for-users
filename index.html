@@ -4,44 +4,91 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EDS Program Login</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    #user-info { margin-top: 20px; }
-    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    input, button { margin: 5px; padding: 10px; }
   </style>
 </head>
 <body>
-  <h1>EDS PROGRAM - Login</h1>
+  <h1>EDS Program - Connexion</h1>
 
-  <!-- Bouton login/signup -->
-  <div id="auth">
-    <button onclick="netlifyIdentity.open()">Se connecter / S'inscrire</button>
+  <div id="auth-container">
+    <input type="email" id="email" placeholder="Email"><br>
+    <input type="password" id="password" placeholder="Mot de passe"><br>
+    <button onclick="signup()">S'inscrire</button>
+    <button onclick="login()">Se connecter</button>
+    <button onclick="resetPassword()">Mot de passe oublié ?</button><br><br>
+    <button onclick="loginWithGoogle()">Connexion avec Google</button>
   </div>
 
-  <!-- Zòn pou montre user info -->
   <div id="user-info"></div>
 
   <script>
-    netlifyIdentity.on('init', user => console.log("Init:", user));
-    
-    netlifyIdentity.on('login', user => {
-      document.getElementById("user-info").innerHTML = `
-        <p>Bienvenue <b>${user.user_metadata.full_name || user.email}</b></p>
-        <p>Email: ${user.email}</p>
-        <button onclick="netlifyIdentity.logout()">Déconnexion</button>
-      `;
-      console.log("User logged in:", user);
+    // 🔑 Remplace ak config Firebase ou
+    const firebaseConfig = {
+      apiKey: "VOTRE_API_KEY",
+      authDomain: "VOTRE_PROJECT.firebaseapp.com",
+      projectId: "VOTRE_PROJECT",
+      storageBucket: "VOTRE_PROJECT.appspot.com",
+      messagingSenderId: "XXXXXXXXX",
+      appId: "XXXXXXXXX"
+    };
+
+    // Init Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Signup
+    function signup() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(userCredential => alert("Compte créé 🎉"))
+        .catch(err => alert(err.message));
+    }
+
+    // Login
+    function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(err => alert(err.message));
+    }
+
+    // Reset password
+    function resetPassword() {
+      const email = document.getElementById("email").value;
+      auth.sendPasswordResetEmail(email)
+        .then(() => alert("Email de réinitialisation envoyé ✉️"))
+        .catch(err => alert(err.message));
+    }
+
+    // Login Google
+    function loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => alert(err.message));
+    }
+
+    // Observer user
+    auth.onAuthStateChanged(user => {
+      const infoDiv = document.getElementById("user-info");
+      if (user) {
+        infoDiv.innerHTML = `
+          <p>Connecté en tant que <b>${user.email}</b></p>
+          <button onclick="logout()">Déconnexion</button>
+        `;
+      } else {
+        infoDiv.innerHTML = "";
+      }
     });
 
-    netlifyIdentity.on('logout', () => {
-      document.getElementById("user-info").innerHTML = "";
-      console.log("User logged out");
-    });
+    // Logout
+    function logout() {
+      auth.signOut();
+    }
   </script>
 </body>
 </html>
+
