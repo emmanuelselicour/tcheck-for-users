@@ -1,94 +1,459 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EDS Program Login</title>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    input, button { margin: 5px; padding: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système Auth Netlify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: #4e54c8;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .app-content {
+            display: flex;
+            flex-direction: row;
+            min-height: 500px;
+        }
+        
+        .auth-section {
+            flex: 1;
+            padding: 30px;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .user-section {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #4e54c8;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus {
+            border-color: #4e54c8;
+            outline: none;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background: #4e54c8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #3a3eb3;
+        }
+        
+        .social-auth {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .facebook {
+            background: #3b5998;
+        }
+        
+        .google {
+            background: #db4437;
+        }
+        
+        .github {
+            background: #333;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        .divider::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        .user-card {
+            background: #f0f4ff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .user-info {
+            margin-bottom: 20px;
+        }
+        
+        .user-detail {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .user-detail label {
+            width: 120px;
+            color: #666;
+        }
+        
+        .user-detail span {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .tasks {
+            margin-top: 25px;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-check {
+            margin-right: 10px;
+        }
+        
+        .task-text {
+            flex: 1;
+        }
+        
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        
+        .logout-btn {
+            background: #ff4d4d;
+            margin-top: 20px;
+        }
+        
+        .logout-btn:hover {
+            background: #e60000;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .forgot-password a {
+            color: #4e54c8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .app-content {
+                flex-direction: column;
+            }
+            
+            .auth-section, .user-section {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>EDS Program - Connexion</h1>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-lock"></i> Authentification Netlify</h1>
+            <p>Gestion des utilisateurs avec stockage des données</p>
+        </header>
+        
+        <div class="app-content">
+            <div class="auth-section">
+                <h2>Connexion / Inscription</h2>
+                <p>Connectez-vous pour accéder à votre espace personnel</p>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Votre adresse email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" placeholder="Votre mot de passe">
+                </div>
+                
+                <button id="login-btn">Se connecter</button>
+                <button id="signup-btn">Créer un compte</button>
+                
+                <div class="forgot-password">
+                    <a href="#" id="forgot-password">Mot de passe oublié ?</a>
+                </div>
+                
+                <div class="divider">ou</div>
+                
+                <div class="social-auth">
+                    <button class="social-btn facebook"><i class="fab fa-facebook"></i> Facebook</button>
+                    <button class="social-btn google"><i class="fab fa-google"></i> Google</button>
+                    <button class="social-btn github"><i class="fab fa-github"></i> GitHub</button>
+                </div>
+            </div>
+            
+            <div class="user-section">
+                <div id="user-not-connected">
+                    <h2>Bienvenue!</h2>
+                    <p>Veuillez vous connecter pour voir vos informations et tâches.</p>
+                </div>
+                
+                <div id="user-connected" class="hidden">
+                    <h2>Votre profil</h2>
+                    
+                    <div class="user-card">
+                        <div class="user-info">
+                            <div class="user-detail">
+                                <label>Nom:</label>
+                                <span id="user-name">Jean Dupont</span>
+                            </div>
+                            <div class="user-detail">
+                                <label>Email:</label>
+                                <span id="user-email">jean.dupont@example.com</span>
+                            </div>
+                            <div class="user-detail">
+                                <label>Dernière connexion:</label>
+                                <span id="last-login">12/08/2023 14:30</span>
+                            </div>
+                        </div>
+                        
+                        <div class="tasks">
+                            <h3>Vos tâches</h3>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-check" checked>
+                                <div class="task-text completed">Configurer Netlify Identity</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-check" checked>
+                                <div class="task-text completed">Intégrer l'authentification sociale</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-check">
+                                <div class="task-text">Déployer l'application</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-check">
+                                <div class="task-text">Tester le système de réinitialisation</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="logout-btn" id="logout-btn">Se déconnecter</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <div id="auth-container">
-    <input type="email" id="email" placeholder="Email"><br>
-    <input type="password" id="password" placeholder="Mot de passe"><br>
-    <button onclick="signup()">S'inscrire</button>
-    <button onclick="login()">Se connecter</button>
-    <button onclick="resetPassword()">Mot de passe oublié ?</button><br><br>
-    <button onclick="loginWithGoogle()">Connexion avec Google</button>
-  </div>
-
-  <div id="user-info"></div>
-
-  <script>
-    // 🔑 Remplace ak config Firebase ou
-    const firebaseConfig = {
-      apiKey: "VOTRE_API_KEY",
-      authDomain: "VOTRE_PROJECT.firebaseapp.com",
-      projectId: "VOTRE_PROJECT",
-      storageBucket: "VOTRE_PROJECT.appspot.com",
-      messagingSenderId: "XXXXXXXXX",
-      appId: "XXXXXXXXX"
-    };
-
-    // Init Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // Signup
-    function signup() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(userCredential => alert("Compte créé 🎉"))
-        .catch(err => alert(err.message));
-    }
-
-    // Login
-    function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password)
-        .catch(err => alert(err.message));
-    }
-
-    // Reset password
-    function resetPassword() {
-      const email = document.getElementById("email").value;
-      auth.sendPasswordResetEmail(email)
-        .then(() => alert("Email de réinitialisation envoyé ✉️"))
-        .catch(err => alert(err.message));
-    }
-
-    // Login Google
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(err => alert(err.message));
-    }
-
-    // Observer user
-    auth.onAuthStateChanged(user => {
-      const infoDiv = document.getElementById("user-info");
-      if (user) {
-        infoDiv.innerHTML = `
-          <p>Connecté en tant que <b>${user.email}</b></p>
-          <button onclick="logout()">Déconnexion</button>
-        `;
-      } else {
-        infoDiv.innerHTML = "";
-      }
-    });
-
-    // Logout
-    function logout() {
-      auth.signOut();
-    }
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments du DOM
+            const loginBtn = document.getElementById('login-btn');
+            const signupBtn = document.getElementById('signup-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const forgotPasswordLink = document.getElementById('forgot-password');
+            const userNotConnected = document.getElementById('user-not-connected');
+            const userConnected = document.getElementById('user-connected');
+            
+            // Simulation de connexion
+            loginBtn.addEventListener('click', function() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (email && password) {
+                    // Simuler une connexion réussie
+                    userNotConnected.classList.add('hidden');
+                    userConnected.classList.remove('hidden');
+                    
+                    // Mettre à jour les informations utilisateur
+                    document.getElementById('user-email').textContent = email;
+                    document.getElementById('user-name').textContent = email.split('@')[0];
+                    document.getElementById('last-login').textContent = new Date().toLocaleString();
+                    
+                    // Simuler la récupération des données utilisateur depuis Netlify
+                    simulateUserDataRetrieval(email);
+                } else {
+                    alert('Veuillez entrer un email et un mot de passe');
+                }
+            });
+            
+            // Simulation d'inscription
+            signupBtn.addEventListener('click', function() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (email && password) {
+                    alert(`Compte créé pour ${email}. Un email de confirmation a été envoyé.`);
+                    // Normalement, Netlify enverrait un email de confirmation
+                } else {
+                    alert('Veuillez entrer un email et un mot de passe');
+                }
+            });
+            
+            // Simulation de déconnexion
+            logoutBtn.addEventListener('click', function() {
+                userConnected.classList.add('hidden');
+                userNotConnected.classList.remove('hidden');
+                
+                // Réinitialiser les champs
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+            });
+            
+            // Simulation de réinitialisation de mot de passe
+            forgotPasswordLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                
+                if (email) {
+                    alert(`Un email de réinitialisation a été envoyé à ${email}`);
+                    // Normalement, Netlify enverrait un email de réinitialisation
+                } else {
+                    alert('Veuillez entrer votre adresse email');
+                }
+            });
+            
+            // Simulation de connexion via réseaux sociaux
+            document.querySelectorAll('.social-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const provider = this.textContent.trim();
+                    alert(`Redirection vers l'authentification ${provider}`);
+                    // Normalement, cela redirigerait vers le provider OAuth
+                });
+            });
+            
+            // Fonction pour simuler la récupération des données utilisateur
+            function simulateUserDataRetrieval(email) {
+                console.log(`Récupération des données pour ${email} depuis Netlify...`);
+                // Dans une vraie implémentation, on récupérerait les données depuis Netlify Functions
+                // ou depuis le stockage Netlify
+            }
+            
+            // Gestion des cases à cocher des tâches
+            document.querySelectorAll('.task-check').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const taskText = this.nextElementSibling;
+                    if (this.checked) {
+                        taskText.classList.add('completed');
+                    } else {
+                        taskText.classList.remove('completed');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
-
